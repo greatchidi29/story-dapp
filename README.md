@@ -1,0 +1,3 @@
+Storyslot is a decentralized application that enables users share stories. The best part about this dApp is that the more users that like the story the more the story becomes more valuable to own and the owner can sell it to other users if he chooses or wait till he get more likes. This serves as a way to earn extra money from the marketplace. This was built using React and Bootstrap
+
+Link to dapp: https://condescending-almeida-a68730.netlify.app/
