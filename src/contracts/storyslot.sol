@@ -28,6 +28,8 @@ interface IERC20Token {
 }
 
 contract StorySlot {
+
+
     struct Story {
         address payable owner;
         string title;
@@ -37,8 +39,13 @@ contract StorySlot {
         bool isSell;
         bool isPaid;
     }
+    mapping (uint256 => Story) stories;
 
-    mapping(uint256 => Story) stories;
+    // using map to assign if an address has already like a story or not
+    // true means -> address has liked the story with a particular story_id
+    // false (default) -> address has not-liked or disliked(had liked before) the story with a particular story_id
+    mapping (address => mapping(uint256 => bool)) storyliked; 
+
     uint256 storyLength = 0;
 
     address internal cUsdTokenAddress =
@@ -87,10 +94,25 @@ contract StorySlot {
         );
     }
 
-    function likeStory(uint256 _index) public {
-        stories[_index].likes++;
-        if (stories[_index].likes % 2 == 0) {
-            stories[_index].amount++;
+    function likeOrDislikeStory(uint256 _index) public {
+        // Owner should not be allowed to like its own story and increase the price arbitarily
+        require(
+            msg.sender != stories[_index].owner, // prevents owner liking its own story
+            "Owner cannot like its own story."
+        );
+        // a single user cannot like the same story multiple times and increase the price
+        if (storyliked[msg.sender][_index] == false) {
+            stories[_index].likes++;
+            storyliked[msg.sender][_index] = true; // setting the value true for the current user. The current user has liked this story.
+            if (stories[_index].likes % 2 == 0) {
+                stories[_index].amount++; // updaing the amount
+            }
+        }
+        else {
+            stories[_index].likes--;
+            storyliked[msg.sender][_index] = false; // setting the value to false for current user. The current user has disliked this story.
+            if (stories[_index].likes % 2 != 0 )
+                stories[_index].amount--; // decrementing the amount of story based on the current number of likes
         }
     }
 
