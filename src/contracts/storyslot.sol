@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 interface IERC20Token {
     function transfer(address, uint256) external returns (bool);
@@ -39,10 +39,19 @@ contract StorySlot {
     }
 
     mapping(uint256 => Story) stories;
+
     uint256 storyLength = 0;
+
 
     address internal cUsdTokenAddress =
         0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
+
+
+    // this modifer ensures that only the owner of the story wil access certain functionlity
+    modifier is_storyowner(uint story_id){
+        require(msg.sender == stories[story_id].owner);
+        _;
+    }
 
     function createStory(
         string memory _title,
@@ -94,7 +103,7 @@ contract StorySlot {
         }
     }
 
-    function buyStory(uint256 _index) public payable {
+    function buyStory(uint256 _index)  public payable {
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
@@ -107,7 +116,7 @@ contract StorySlot {
         stories[_index].isPaid = true;
     }
 
-    function sellStory(uint256 _index) public {
+    function sellStory(uint256 _index) is_storyowner(_index) public  {
         require(stories[_index].isPaid == true, "Story has not been bought");
         stories[_index].isPaid = false;
     }
